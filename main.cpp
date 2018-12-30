@@ -31,6 +31,8 @@ using namespace std;
 using namespace Eigen;
 
 
+bool is_slam_init = false;
+
 void featureTracking(Mat img_1, Mat img_2, vector<Point2f>& points1, vector<Point2f>& points2, vector<uchar>& status)   {
 
     //this function automatically gets rid of points for which tracking fails
@@ -225,6 +227,60 @@ int main( int argc, char** argv )
         cv::recoverPose(e_mat, pts1, pts2, R, t,fx,cv::Point2f(cx,cy),mask);
 
 
+        if(!is_slam_init)
+{
+    //calculate 3D points
+    cout<<"Initializing SLAM, setting the first two frames translation as 1."<<endl;
+   
+    Mat K_mat = Mat::zeros(3,3,CV_64F);
+    K_mat.at<double>(0,0) = fx;
+    K_mat.at<double>(1,1) = fy;
+ 
+    K_mat.at<double>(0,2) = cx;
+    K_mat.at<double>(1,2) = cy;
+
+    K_mat.at<double>(2,2) = 1;
+    
+    cout<<"K_mat = "<<endl<<K_mat<<endl;
+
+    Mat T1_cv;
+    hconcat(Mat::eye(3, 3, CV_64F),Mat::zeros(3, 1, CV_64F),T1_cv);
+
+    Mat T2_cv;
+    hconcat(R,t,T2_cv);
+
+ cout<<"T1_cv = "<<endl<<T1_cv<<endl;
+    cout<<"T2_cv = "<<endl<<T2_cv<<endl;
+
+Mat proj_cam_1;
+    Mat proj_cam_2;
+
+    proj_cam_1 = K_mat*T1_cv;
+    proj_cam_2 = K_mat*T2_cv;
+
+    cout<<"proj_cam_1 = "<<endl<<proj_cam_1<<endl;
+    cout<<"proj_cam_2 = "<<endl<<proj_cam_2<<endl;
+    //call triangulatePoints from opencv
+    Mat results;
+    triangulatePoints(proj_cam_1,proj_cam_2,pts1,pts2,results);
+    //transpose
+    results = results.t();
+
+    MatrixXd results_eigen;
+    cv2eigen(results,results_eigen);
+
+    for(int i = 0; i < results_eigen.rows() ; i++)
+    {
+        results_eigen.row(i) /= results_eigen(i,3);
+    }
+
+
+    cout<<"results_eigen = "<<endl<<results_eigen<<endl;
+
+
+    return 0;
+
+}
 
 
         //end of using epipolar constrain
