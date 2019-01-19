@@ -381,6 +381,7 @@ yzy_slam: /usr/lib/x86_64-linux-gnu/libboost_atomic.so
 yzy_slam: /usr/lib/x86_64-linux-gnu/libboost_regex.so
 yzy_slam: /usr/lib/x86_64-linux-gnu/libpthread.so
 yzy_slam: /usr/lib/x86_64-linux-gnu/libpcl_common.so
+yzy_slam: /usr/local/lib/libceres.a
 yzy_slam: /opt/ros/kinetic/lib/x86_64-linux-gnu/libopencv_shape3.so.3.3.1
 yzy_slam: /opt/ros/kinetic/lib/x86_64-linux-gnu/libopencv_photo3.so.3.3.1
 yzy_slam: /opt/ros/kinetic/lib/x86_64-linux-gnu/libopencv_datasets3.so.3.3.1
@@ -515,6 +516,27 @@ yzy_slam: /usr/lib/x86_64-linux-gnu/libvtkCommonCore-6.2.so.6.2.0
 yzy_slam: /usr/lib/x86_64-linux-gnu/libvtkDICOMParser-6.2.so.6.2.0
 yzy_slam: /usr/lib/x86_64-linux-gnu/libvtkmetaio-6.2.so.6.2.0
 yzy_slam: /usr/lib/x86_64-linux-gnu/libz.so
+yzy_slam: /usr/local/lib/libglog.a
+yzy_slam: /usr/lib/x86_64-linux-gnu/libspqr.so
+yzy_slam: /usr/lib/x86_64-linux-gnu/libtbbmalloc.so
+yzy_slam: /usr/lib/x86_64-linux-gnu/libtbb.so
+yzy_slam: /usr/lib/x86_64-linux-gnu/libcholmod.so
+yzy_slam: /usr/lib/x86_64-linux-gnu/libccolamd.so
+yzy_slam: /usr/lib/x86_64-linux-gnu/libcamd.so
+yzy_slam: /usr/lib/x86_64-linux-gnu/libcolamd.so
+yzy_slam: /usr/lib/x86_64-linux-gnu/libamd.so
+yzy_slam: /usr/lib/liblapack.so
+yzy_slam: /usr/lib/libf77blas.so
+yzy_slam: /usr/lib/libatlas.so
+yzy_slam: /usr/lib/x86_64-linux-gnu/libsuitesparseconfig.so
+yzy_slam: /usr/lib/x86_64-linux-gnu/librt.so
+yzy_slam: /usr/lib/x86_64-linux-gnu/libcxsparse.so
+yzy_slam: /usr/lib/liblapack.so
+yzy_slam: /usr/lib/libf77blas.so
+yzy_slam: /usr/lib/libatlas.so
+yzy_slam: /usr/lib/x86_64-linux-gnu/libsuitesparseconfig.so
+yzy_slam: /usr/lib/x86_64-linux-gnu/librt.so
+yzy_slam: /usr/lib/x86_64-linux-gnu/libcxsparse.so
 yzy_slam: CMakeFiles/yzy_slam.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/zhenyu/yzy_slam/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable yzy_slam"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/yzy_slam.dir/link.txt --verbose=$(VERBOSE)

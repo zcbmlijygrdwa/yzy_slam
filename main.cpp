@@ -30,6 +30,8 @@
 
 #include "Frame.hpp"
 
+#include "/home/zhenyu/cvminecraft/pose_estimation/case_3D_2D/SolvePnpCeres.hpp"
+
 using namespace cv;
 using namespace std;
 using namespace Eigen;
@@ -38,7 +40,7 @@ using namespace Eigen;
 bool is_slam_init = false;
 Frame ref_frame;
 
-void featureTracking(Mat img_1, Mat img_2, vector<Point2f>& points1, vector<Point2f>& points2, vector<uchar>& status)   {
+void featureTracking(Mat img_1, Mat img_2, vector<Point2d>& points1, vector<Point2d>& points2, vector<uchar>& status)   {
 
     //this function automatically gets rid of points for which tracking fails
 
@@ -51,7 +53,7 @@ void featureTracking(Mat img_1, Mat img_2, vector<Point2f>& points1, vector<Poin
     int indexCorrection = 0;
     int status_size = status.size();
     for( int i=0; i<status_size; i++)
-    {  Point2f pt = points2.at(i- indexCorrection);
+    {  Point2d pt = points2.at(i- indexCorrection);
         if ((status.at(i) == 0)||(pt.x<0)||(pt.y<0))    {
             if((pt.x<0)||(pt.y<0))    {
                 status.at(i) = 0;
@@ -64,7 +66,7 @@ void featureTracking(Mat img_1, Mat img_2, vector<Point2f>& points1, vector<Poin
 }
 
 
-int     findCorrespondingPoints( const cv::Mat& img1, const cv::Mat& img2, vector<cv::Point2f>& points1, vector<cv::Point2f>& points2, cv::Mat& desp2, cv::Mat& img1_with_features);
+int     findCorrespondingPoints( const cv::Mat& img1, const cv::Mat& img2, vector<cv::Point2d>& points1, vector<cv::Point2d>& points2, cv::Mat& desp2, cv::Mat& img1_with_features);
 //const int MAX_FEATURES = 500;
 const int MAX_FEATURES = 500;
 // 相机内参
@@ -87,9 +89,9 @@ double clockToMilliseconds(clock_t ticks){
 
 
 
-void visulizePose2d(Mat& traj_image,Isometry3d& pose_in)
+void visulizePose2d(Mat& traj_image,Isometry3f& pose_in)
 {
-    Vector3d translation = pose_in.translation();
+    Vector3f translation = pose_in.translation();
 
     double drawX = -translation(0);
     double drawY = translation(1);
@@ -104,7 +106,7 @@ void visulizePose2d(Mat& traj_image,Isometry3d& pose_in)
 }
 
 
-void vis_3d_points(vector<Point3f> pts)
+void vis_3d_points(vector<Point3d> pts)
 {
     pcl::PointCloud<pcl::PointXYZ>::Ptr pointCloudPtr;
     pcl::PointCloud<pcl::PointXYZ> pointCloud;
@@ -135,11 +137,7 @@ void vis_3d_points(vector<Point3f> pts)
 
 int main( int argc, char** argv )
 {
-
-
-
     VideoCapture cap;
-
     if(argc!=3)
     {
         cout<<"Useage:"<<endl<<"./yzy_vo cam [cameraIdex]"<<endl<<"./yzy_vo video [pathTovideo]"<<endl;
@@ -177,14 +175,14 @@ int main( int argc, char** argv )
 
 
     //create Isometry object to keep tracking of pose
-    Isometry3d pose_global = Isometry3d::Identity();
+    Isometry3f pose_global = Isometry3f::Identity();
 
-    pose_global.rotate(AngleAxisd(3.141592653*0.5,Vector3d::UnitX()));
+    pose_global.rotate(AngleAxisf(3.141592653*0.5f,Vector3f::UnitX()));
 
     vector<uchar> status;
 
-    vector<Point2f> prevFeatures;
-    vector<Point2f> currFeatures;
+    vector<Point2d> prevFeatures;
+    vector<Point2d> currFeatures;
 
 
 
@@ -201,7 +199,7 @@ int main( int argc, char** argv )
     vector<cv::KeyPoint> kp1;
     cv::Mat desp1;
     orb->detectAndCompute( img1, cv::Mat(), kp1, desp1 );
-    vector<Point2f> tempPoints1;
+    vector<Point2d> tempPoints1;
     cout<<"kp1.size() = "<<kp1.size()<<endl;
     for(auto tempKp:kp1)
     { 
@@ -228,7 +226,7 @@ int main( int argc, char** argv )
         //resize(img2, img2, cv::Size(), resizeFactor, resizeFactor);
 
         // 找到对应点
-        vector<cv::Point2f> pts1, pts2;
+        vector<cv::Point2d> pts1, pts2;
         cv::Mat desp2;
 
 
@@ -244,7 +242,7 @@ int main( int argc, char** argv )
 
         //prevFeatures = pts1;
 
-        vector<Point2f> currFeatures;
+        vector<Point2d> currFeatures;
         currFeatures = pts2; 
 
         //feature tracking
@@ -258,11 +256,11 @@ int main( int argc, char** argv )
         //use epipolar constrain
         cv::Mat mask;
         cv::Mat e_mat;
-        e_mat = cv::findEssentialMat(pts1,pts2,fx,cv::Point2f(cx,cy),cv::RANSAC, 0.999, 1.f,mask);
-        //e_mat = cv::findEssentialMat(prevFeatures,currFeatures,fx,cv::Point2f(cx,cy),cv::RANSAC, 0.999, 1.f,mask);
+        e_mat = cv::findEssentialMat(pts1,pts2,fx,cv::Point2d(cx,cy),cv::RANSAC, 0.999, 1.f,mask);
+        //e_mat = cv::findEssentialMat(prevFeatures,currFeatures,fx,cv::Point2d(cx,cy),cv::RANSAC, 0.999, 1.f,mask);
         //cout << "E:" << endl << e_mat/e_mat.at<double>(2,2) << endl;
         cv::Mat R, t;
-        cv::recoverPose(e_mat, pts1, pts2, R, t,fx,cv::Point2f(cx,cy),mask);
+        cv::recoverPose(e_mat, pts1, pts2, R, t,fx,cv::Point2d(cx,cy),mask);
 
         Mat K_mat = Mat::zeros(3,3,CV_64F);
         K_mat.at<double>(0,0) = fx;
@@ -274,6 +272,9 @@ int main( int argc, char** argv )
         K_mat.at<double>(2,2) = 1;
 
         cout<<"K_mat = "<<endl<<K_mat<<endl;
+        Matrix3f rot_x;
+        float pi = 3.141592653;
+        rot_x = AngleAxisf(pi*0.5f,Vector3f::UnitX());
 
         if(!is_slam_init)
         {
@@ -284,22 +285,19 @@ int main( int argc, char** argv )
             Mat T1_cv;
             //the rotation of T1 is not ZERO ROTATION matrix, need to rotate roll so that the Z axis point forward(camera)
 
-            float pi = 3.141592653;
-            
+
             cout<<"AngleAxisf(pi*0.5f,Vector3f::UnitX()) = "<<AngleAxisf(pi*0.5f,Vector3f::UnitX()).toRotationMatrix()<<endl;
-            
-            Matrix3f rot_x;
-            rot_x = AngleAxisf(pi*0.5f,Vector3f::UnitX());
+
             Mat rot_x_mat;
             eigen2cv(rot_x,rot_x_mat);
             rot_x_mat.convertTo(rot_x_mat,CV_64F);
             cout<<"rot_x_mat = "<<endl<<rot_x_mat<<endl;
             cout<<"R = "<<endl<<R<<endl;
-        
+
             hconcat(rot_x_mat,Mat::zeros(3, 1, CV_64F),T1_cv);
 
             Mat T2_cv;
-            hconcat(R,t,T2_cv);
+            hconcat(rot_x_mat*R,t,T2_cv);
 
             cout<<"T1_cv = "<<endl<<T1_cv<<endl;
             cout<<"T2_cv = "<<endl<<T2_cv<<endl;
@@ -322,18 +320,19 @@ int main( int argc, char** argv )
             cv2eigen(results,results_eigen);
 
 
-            vector<Point3f> points3d;
+            vector<Point3d> points3d;
             for(int i = 0; i < results_eigen.rows() ; i++)
             {
                 results_eigen.row(i) /= results_eigen(i,3);
-                points3d.push_back(Point3f(results_eigen(i,0),results_eigen(i,1),results_eigen(i,2)));
+                points3d.push_back(Point3d(results_eigen(i,0),results_eigen(i,1),results_eigen(i,2)));
 
 
             }
             cout<<"results_eigen = "<<endl<<results_eigen<<endl;
 
-            vis_3d_points(points3d);
-
+            //imshow("img1_with_features",img1_with_features);
+            //waitKey(1);
+            //vis_3d_points(points3d);
             ref_frame.add_features_2d(pts2);
             ref_frame.add_features_3d(points3d);
             ref_frame.add_features_desp(desp2);
@@ -344,6 +343,7 @@ int main( int argc, char** argv )
 
             cv::Mat R_new, t_new;
 
+            cout<<"try with pts2"<<endl;            
             solvePnP(points3d,pts2,K_mat,Mat(),R_new,t_new,false,CV_ITERATIVE);
 
             cout<<"R_new = "<<endl<<R_new<<endl;
@@ -355,6 +355,14 @@ int main( int argc, char** argv )
             cout<<"R_new = "<<endl<<R_new<<endl;
             cout<<"t_new = "<<endl<<t_new<<endl;
 
+            cout<<"if solvePnP with pts1 with ceres:"<<endl;
+            SolvePnpCeres solvepnpceres;
+            solvepnpceres.init();
+            solvepnpceres.setInputs(points3d,pts1,K_mat);
+            solvepnpceres.optimize(&R_new,&t_new,false);
+
+            cout<<"R_new = "<<endl<<R_new<<endl;
+            cout<<"t_new = "<<endl<<t_new<<endl;
 
             is_slam_init = true;
 
@@ -391,11 +399,11 @@ int main( int argc, char** argv )
             cout<<"matches.size() = "<<matches.size()<<endl;
             if (matches.size() <= 20) //匹配点太少
                 return false;
-            vector<Point2f> new_pts;
-            vector<Point3f> pre_pts_3d = ref_frame.features_3d;
-            vector<Point2f> pre_pts_2d = ref_frame.features_2d;
-            vector<Point3f> pre_pts_3d_match;
-            vector<Point2f> pre_pts_2d_match;
+            vector<Point2d> new_pts;
+            vector<Point3d> pre_pts_3d = ref_frame.features_3d;
+            vector<Point2d> pre_pts_2d = ref_frame.features_2d;
+            vector<Point3d> pre_pts_3d_match;
+            vector<Point2d> pre_pts_2d_match;
             for ( auto m:matches )
             {
                 pre_pts_3d_match.push_back( pre_pts_3d[m.queryIdx]);
@@ -425,6 +433,9 @@ int main( int argc, char** argv )
             cout<<"R_new = "<<endl<<R_new<<endl;
             cout<<"t_new = "<<endl<<t_new<<endl;
 
+
+
+
             cout<<"ref_frame.features_desp size "<<ref_frame.features_desp.rows<<", "<<ref_frame.features_desp.cols<<endl;
 
 
@@ -447,13 +458,13 @@ int main( int argc, char** argv )
 
 
             //accumulating transformation
-            Matrix3d rot_mat;
-            Vector3d t_mat;
+            Matrix3f rot_mat;
+            Vector3f t_mat;
             cv::cv2eigen(R_new,rot_mat);
             //cout<<"rot_mat = "<<rot_mat<<endl;
             cv::cv2eigen(t_new,t_mat);
             //cout<<"t_mat = "<<t_mat<<endl;
-            Isometry3d pose_temp = Isometry3d::Identity();
+            Isometry3f pose_temp = Isometry3f::Identity();
 
 
             //************************************************
@@ -468,12 +479,13 @@ int main( int argc, char** argv )
 
             if(frameCount!=-160)
             {
+                pose_temp.rotate(rot_x);
                 pose_temp.rotate(rot_mat);
                 pose_temp.pretranslate(t_mat);
             }
             else
             {
-                rot_mat = AngleAxisd(0.25f,Vector3d::UnitY());
+                rot_mat = AngleAxisf(0.25f,Vector3f::UnitY());
                 t_mat <<0,0,0;
                 cout<<"test rot_mat = "<<rot_mat<<endl;
                 cout<<"test t_mat = "<<t_mat<<endl;
@@ -494,7 +506,7 @@ int main( int argc, char** argv )
             //pose_global.rotate(pose_temp.rotation());
             //pose_global.pretranslate(pose_temp.translation());
 
-            Vector3d ea = pose_temp.rotation().eulerAngles(0, 1, 2);
+            Vector3f ea = pose_temp.rotation().eulerAngles(0, 1, 2);
             cout<<"pose_temp[R t] = ["<<ea.transpose()<<","<<pose_temp.translation().transpose()<<"]"<<endl;
 
             ea = pose_global.rotation().eulerAngles(0, 1, 2);
@@ -530,7 +542,7 @@ int main( int argc, char** argv )
 }
 
 
-int     findCorrespondingPoints( const cv::Mat& img1, const cv::Mat& img2, vector<cv::Point2f>& points1, vector<cv::Point2f>& points2, cv::Mat& desp2_out, cv::Mat& img1_with_features)
+int     findCorrespondingPoints( const cv::Mat& img1, const cv::Mat& img2, vector<cv::Point2d>& points1, vector<cv::Point2d>& points2, cv::Mat& desp2_out, cv::Mat& img1_with_features)
 {
     cv::Ptr<cv::Feature2D> orb = cv::ORB::create(MAX_FEATURES);
     vector<cv::KeyPoint> kp1, kp2;

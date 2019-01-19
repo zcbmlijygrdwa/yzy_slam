@@ -14,8 +14,8 @@ class Frame
     public:
         //std::vector<Keypoint> features;
         cv::Mat features_desp;
-        std::vector<cv::Point2f> features_2d;
-        std::vector<cv::Point3f> features_3d;
+        std::vector<cv::Point2d> features_2d;
+        std::vector<cv::Point3d> features_3d;
         Eigen::Isometry3d T;   //transform relative to the world origin
 
         Frame()
@@ -28,12 +28,12 @@ class Frame
             Frame::features_desp = features_desp;
         }
 
-        void add_features_2d(std::vector<cv::Point2f> features_2d)
+        void add_features_2d(std::vector<cv::Point2d> features_2d)
         {
             Frame::features_2d = features_2d;
         }
 
-        void add_features_3d(std::vector<cv::Point3f> features_3d)
+        void add_features_3d(std::vector<cv::Point3d> features_3d)
         {
             Frame::features_3d = features_3d;
         }
