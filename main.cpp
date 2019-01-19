@@ -111,7 +111,7 @@ void vis_3d_points(vector<Point3d> pts)
     pcl::PointCloud<pcl::PointXYZ>::Ptr pointCloudPtr;
     pcl::PointCloud<pcl::PointXYZ> pointCloud;
 
-    for(int i = 0 ; i< pts.size() ; i++)
+    for(uint i = 0 ; i< pts.size() ; i++)
     {
         pcl::PointXYZ point;
         point.x = pts[i].x;
@@ -321,44 +321,56 @@ int main( int argc, char** argv )
 
 
             vector<Point3d> points3d;
+            vector<Point2d> points2d;
+            cv::Mat descriptor2;
+                
             for(int i = 0; i < results_eigen.rows() ; i++)
             {
                 results_eigen.row(i) /= results_eigen(i,3);
-                points3d.push_back(Point3d(results_eigen(i,0),results_eigen(i,1),results_eigen(i,2)));
-
-
+                if(results_eigen(i,1)>0)
+                {
+                    points3d.push_back(Point3d(results_eigen(i,0),results_eigen(i,1),results_eigen(i,2)));
+                    points2d.push_back(pts2[i]);
+                    cout<<"points3d[i] = ["<<results_eigen(i,0)<<","<<results_eigen(i,1)<<","<<results_eigen(i,2)<<"]"<<endl;
+                
+                    descriptor2.push_back(desp2.row(i));
+                    //desp2.copyTo(descriptor2.row(i));
+                }
             }
-            cout<<"results_eigen = "<<endl<<results_eigen<<endl;
+            cout<<"descriptor2.rows = "<<descriptor2.rows<<endl;
+            
+            //cout<<"results_eigen = "<<endl<<results_eigen<<endl;
 
             //imshow("img1_with_features",img1_with_features);
             //waitKey(1);
-            //vis_3d_points(points3d);
-            ref_frame.add_features_2d(pts2);
+            
+            vis_3d_points(points3d);
+            ref_frame.add_features_2d(points2d);
             ref_frame.add_features_3d(points3d);
-            ref_frame.add_features_desp(desp2);
+            ref_frame.add_features_desp(descriptor2);
 
-            cout<<"ref_frame.featresize()"<<ref_frame.feature_count()<<endl;
+            cout<<"ref_frame.featresize() = "<<ref_frame.feature_count()<<endl;
 
             //use PnP to verify
 
             cv::Mat R_new, t_new;
 
             cout<<"try with pts2"<<endl;            
-            solvePnP(points3d,pts2,K_mat,Mat(),R_new,t_new,false,CV_ITERATIVE);
+            solvePnP(points3d,points2d,K_mat,Mat(),R_new,t_new,false,CV_ITERATIVE);
 
             cout<<"R_new = "<<endl<<R_new<<endl;
             cout<<"t_new = "<<endl<<t_new<<endl;
 
-            cout<<"try with pts1"<<endl;            
-            solvePnP(points3d,pts1,K_mat,Mat(),R_new,t_new,false,CV_ITERATIVE);
+            //cout<<"try with pts1"<<endl;            
+            //solvePnP(points3d,pts1,K_mat,Mat(),R_new,t_new,false,CV_ITERATIVE);
 
-            cout<<"R_new = "<<endl<<R_new<<endl;
-            cout<<"t_new = "<<endl<<t_new<<endl;
+            //cout<<"R_new = "<<endl<<R_new<<endl;
+            //cout<<"t_new = "<<endl<<t_new<<endl;
 
-            cout<<"if solvePnP with pts1 with ceres:"<<endl;
+            cout<<"if solvePnP with pts2 with ceres:"<<endl;
             SolvePnpCeres solvepnpceres;
             solvepnpceres.init();
-            solvepnpceres.setInputs(points3d,pts1,K_mat);
+            solvepnpceres.setInputs(points3d,points2d,K_mat);
             solvepnpceres.optimize(&R_new,&t_new,false);
 
             cout<<"R_new = "<<endl<<R_new<<endl;
@@ -411,7 +423,7 @@ int main( int argc, char** argv )
                 new_pts.push_back( kp[m.trainIdx].pt );
             }
 
-            for(int ii = 0 ; ii<pre_pts_2d_match.size();ii++)
+            for(uint ii = 0 ; ii<pre_pts_2d_match.size();ii++)
             {
                 cout<<pre_pts_2d_match[ii]<<" from pre is match to "<<new_pts[ii]<<endl;
             }
