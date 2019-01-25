@@ -25,13 +25,10 @@
 #include <boost/concept_check.hpp>
 
 
-//PCL
-#include <pcl/visualization/cloud_viewer.h>
-
 #include "Frame.hpp"
 
-#include "/home/zhenyu/cvminecraft/pose_estimation/case_3D_2D/SolvePnpCeres.hpp"
-
+#include "../cvminecraft/pose_estimation/case_3D_2D/SolvePnpCeres.hpp"
+#include "../cvminecraft/opencv_vis/point_set/PointCloudVisualizer.hpp"
 using namespace cv;
 using namespace std;
 using namespace Eigen;
@@ -108,30 +105,13 @@ void visulizePose2d(Mat& traj_image,Isometry3f& pose_in)
 
 void vis_3d_points(vector<Point3d> pts)
 {
-    pcl::PointCloud<pcl::PointXYZ>::Ptr pointCloudPtr;
-    pcl::PointCloud<pcl::PointXYZ> pointCloud;
-
-    for(uint i = 0 ; i< pts.size() ; i++)
+    PointCloudVisualizer pcv;
+    for(uint i = 0 ; i < pts.size() ; i++)
     {
-        pcl::PointXYZ point;
-        point.x = pts[i].x;
-        point.y = pts[i].y;
-        point.z = pts[i].z;
-        pointCloud.points.push_back(point);
-
+        pcv.addPoint(pts[i]);
     }
-
-    cout<<"asdf"<<endl;
-    pointCloudPtr = pointCloud.makeShared();
-    cout<<"2asdf"<<endl;
-    pcl::visualization::CloudViewer viewer ("Simple Cloud Viewer");
-    viewer.showCloud (pointCloudPtr);
-    while (!viewer.wasStopped ())
-    {
-
-    }
-
-
+    pcv.commitPoints();
+    pcv.show();
 }
 
 
@@ -323,7 +303,7 @@ int main( int argc, char** argv )
             vector<Point3d> points3d;
             vector<Point2d> points2d;
             cv::Mat descriptor2;
-                
+
             for(int i = 0; i < results_eigen.rows() ; i++)
             {
                 results_eigen.row(i) /= results_eigen(i,3);
@@ -332,18 +312,18 @@ int main( int argc, char** argv )
                     points3d.push_back(Point3d(results_eigen(i,0),results_eigen(i,1),results_eigen(i,2)));
                     points2d.push_back(pts2[i]);
                     cout<<"points3d[i] = ["<<results_eigen(i,0)<<","<<results_eigen(i,1)<<","<<results_eigen(i,2)<<"]"<<endl;
-                
+
                     descriptor2.push_back(desp2.row(i));
                     //desp2.copyTo(descriptor2.row(i));
                 }
             }
             cout<<"descriptor2.rows = "<<descriptor2.rows<<endl;
-            
+
             //cout<<"results_eigen = "<<endl<<results_eigen<<endl;
 
             //imshow("img1_with_features",img1_with_features);
             //waitKey(1);
-            
+
             vis_3d_points(points3d);
             ref_frame.add_features_2d(points2d);
             ref_frame.add_features_3d(points3d);

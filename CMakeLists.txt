@@ -9,17 +9,13 @@ list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules )
 
 find_package( OpenCV REQUIRED )
 find_package( Eigen3 REQUIRED )
-find_package( PCL REQUIRED )
 find_package( Ceres REQUIRED )
 
 
-link_directories(${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
 
 include_directories( 
 ${EIGEN3_INCLUDE_DIR} 
 ${CHOLMOD_INCLUDE_DIR} 
-${PCL_INCLUDE_DIR}
 "/usr/include/pcl-1.7"
 ${CERES_INCLUDE_DIRS}
 )
@@ -27,9 +23,6 @@ ${CERES_INCLUDE_DIRS}
 add_executable( yzy_slam main.cpp )
 target_link_libraries( yzy_slam
     ${OpenCV_LIBS}
-${PCL_COMMON_LIBRARIES} 
-${PCL_IO_LIBRARIES}
-${PCL_VISUALIZATION_LIBRARIES}
-${CERES_LIBRARIES}
+    ${CERES_LIBRARIES}
 
     )
