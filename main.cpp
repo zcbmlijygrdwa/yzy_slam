@@ -103,12 +103,16 @@ void visulizePose2d(Mat& traj_image,Isometry3f& pose_in)
 }
 
 
-void vis_3d_points(vector<Point3d> pts)
+void vis_3d_points(vector<Point3d> pts3d, vector<Point2d> pts2d, Mat img)
 {
     PointCloudVisualizer pcv;
-    for(uint i = 0 ; i < pts.size() ; i++)
+    for(uint i = 0 ; i < pts3d.size() ; i++)
     {
-        pcv.addPoint(pts[i]);
+        //pcv.addPoint(pts[i]);
+        
+        Vec3b color = img.at<Vec3b>(pts2d[i].x,pts2d[i].y);
+        cout<<"color.val = ["<<uint(color.val[0])<<","<<uint(color.val[1])<<","<<uint(color.val[2])<<"]"<<endl;
+        pcv.addColorPoint(pts3d[i],color.val[0],color.val[1],color.val[2]);
     }
     pcv.commitPoints();
     pcv.show();
@@ -324,7 +328,7 @@ int main( int argc, char** argv )
             //imshow("img1_with_features",img1_with_features);
             //waitKey(1);
 
-            vis_3d_points(points3d);
+            vis_3d_points(points3d,points2d,img2);
             ref_frame.add_features_2d(points2d);
             ref_frame.add_features_3d(points3d);
             ref_frame.add_features_desp(descriptor2);
