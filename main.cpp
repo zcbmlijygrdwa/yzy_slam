@@ -1,11 +1,3 @@
-/**
- * BA Example 
- * Author: Xiang Gao
- * Date: 2016.3
- * Email: gaoxiang12@mails.tsinghua.edu.cn
- * 
- * 在这个程序中，我们读取两张图像，进行特征匹配。然后根据匹配得到的特征，计算相机运动以及特征点的位置。这是一个典型的Bundle Adjustment，我们用g2o进行优化。
- */
 
 
 // for std
@@ -27,8 +19,9 @@
 
 #include "Frame.hpp"
 
-#include "../cvminecraft/pose_estimation/case_3D_2D/SolvePnpCeres.hpp"
 #include "../cvminecraft/opencv_vis/point_set/PointCloudVisualizer.hpp"
+#include "Pose3D2D.hpp"
+
 using namespace cv;
 using namespace std;
 using namespace Eigen;
@@ -339,23 +332,14 @@ int main( int argc, char** argv )
 
             cv::Mat R_new, t_new;
 
-            cout<<"try with pts2"<<endl;            
-            solvePnP(points3d,points2d,K_mat,Mat(),R_new,t_new,false,CV_ITERATIVE);
-
-            cout<<"R_new = "<<endl<<R_new<<endl;
-            cout<<"t_new = "<<endl<<t_new<<endl;
-
-            //cout<<"try with pts1"<<endl;            
-            //solvePnP(points3d,pts1,K_mat,Mat(),R_new,t_new,false,CV_ITERATIVE);
-
-            //cout<<"R_new = "<<endl<<R_new<<endl;
-            //cout<<"t_new = "<<endl<<t_new<<endl;
-
-            cout<<"if solvePnP with pts2 with ceres:"<<endl;
-            SolvePnpCeres solvepnpceres;
-            solvepnpceres.init();
-            solvepnpceres.setInputs(points3d,points2d,K_mat);
-            solvepnpceres.optimize(&R_new,&t_new,false);
+            Pose3D2D pose3d2d_solver;
+            pose3d2d_solver.setPoints3d(points3d);
+            pose3d2d_solver.setPoints2d(points2d);
+            pose3d2d_solver.setCameraIntrinsic(K_mat);
+            pose3d2d_solver.solve();
+            
+            R_new = pose3d2d_solver.rotation();
+            t_new = pose3d2d_solver.translation(); 
 
             cout<<"R_new = "<<endl<<R_new<<endl;
             cout<<"t_new = "<<endl<<t_new<<endl;
@@ -363,7 +347,6 @@ int main( int argc, char** argv )
             is_slam_init = true;
 
             return 0;
-
         }
         else
         {

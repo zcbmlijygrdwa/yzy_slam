@@ -5,6 +5,7 @@ CMakeFiles/yzy_slam.dir/main.cpp.o: /home/zhenyu/cvminecraft/opencv_vis/point_se
 CMakeFiles/yzy_slam.dir/main.cpp.o: /home/zhenyu/cvminecraft/pose_estimation/case_3D_2D/SolvePnpCeres.hpp
 CMakeFiles/yzy_slam.dir/main.cpp.o: ../Frame.hpp
 CMakeFiles/yzy_slam.dir/main.cpp.o: ../Keypoint.hpp
+CMakeFiles/yzy_slam.dir/main.cpp.o: ../Pose3D2D.hpp
 CMakeFiles/yzy_slam.dir/main.cpp.o: ../main.cpp
 CMakeFiles/yzy_slam.dir/main.cpp.o: /opt/ros/kinetic/include/opencv-3.3.1-dev/opencv/cxcore.h
 CMakeFiles/yzy_slam.dir/main.cpp.o: /opt/ros/kinetic/include/opencv-3.3.1-dev/opencv2/calib3d.hpp

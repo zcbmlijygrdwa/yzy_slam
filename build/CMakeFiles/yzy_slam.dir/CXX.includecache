@@ -46,6 +46,14 @@ Keypoint.hpp
 opencv2/core/core.hpp
 -
 
+/home/zhenyu/yzy_slam/Pose3D2D.hpp
+iostream
+-
+opencv2/opencv.hpp
+-
+../cvminecraft/pose_estimation/case_3D_2D/SolvePnpCeres.hpp
+/home/zhenyu/cvminecraft/pose_estimation/case_3D_2D/SolvePnpCeres.hpp
+
 /home/zhenyu/yzy_slam/main.cpp
 iostream
 -
@@ -71,10 +79,10 @@ boost/concept_check.hpp
 -
 Frame.hpp
 /home/zhenyu/yzy_slam/Frame.hpp
-../cvminecraft/pose_estimation/case_3D_2D/SolvePnpCeres.hpp
-/home/zhenyu/cvminecraft/pose_estimation/case_3D_2D/SolvePnpCeres.hpp
 ../cvminecraft/opencv_vis/point_set/PointCloudVisualizer.hpp
 /home/zhenyu/cvminecraft/opencv_vis/point_set/PointCloudVisualizer.hpp
+Pose3D2D.hpp
+/home/zhenyu/yzy_slam/Pose3D2D.hpp
 
 /opt/ros/kinetic/include/opencv-3.3.1-dev/opencv/cxcore.h
 opencv2/core/core_c.h
